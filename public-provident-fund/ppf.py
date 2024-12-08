@@ -7,11 +7,39 @@ EXTN = 5 # Extension period for PPF, allowed for 2 times
 
 
 def calculate_annual_interest_lumpsum(opening_balance, annual_investment):
+    """
+    Calculate the annual interest and closing balance for a lumpsum investment in a Public Provident Fund (PPF).
+
+    Args:
+        opening_balance (float): The initial amount in the PPF account at the beginning of the year.
+        annual_investment (float): The amount invested in the PPF account during the year.
+
+    Returns:
+        tuple: A tuple containing:
+            - opening_balance (float): The initial amount in the PPF account.
+            - annual_investment (float): The amount invested during the year.
+            - interest (float): The interest earned on the total amount (opening balance + annual investment).
+            - closing_balance (float): The total amount in the PPF account at the end of the year.
+    """
     interest = (opening_balance + annual_investment) * INTEREST_RATE
     closing_balance = opening_balance + annual_investment + interest
     return (opening_balance, annual_investment, interest, closing_balance)
 
+
+
 def calculate_annual_interest_sip(opening_balance, monthly_sip):
+    """
+    Calculate the annual interest for a Public Provident Fund (PPF) account with monthly SIP (Systematic Investment Plan).
+    Args:
+        opening_balance (float): The initial balance in the PPF account at the beginning of the year.
+        monthly_sip (float): The amount deposited into the PPF account every month.
+    Returns:
+        tuple: A tuple containing:
+            - opening_balance (float): The initial balance in the PPF account.
+            - annual_investment (float): The total amount invested over the year.
+            - interest (float): The total interest earned over the year.
+            - closing_balance (float): The balance in the PPF account at the end of the year.
+    """
     interest = 0
     ob = opening_balance
     for month in range(12):
@@ -26,6 +54,16 @@ def calculate_annual_interest_sip(opening_balance, monthly_sip):
 
 
 def calculate_ppf_maturity(investment_years, annual_investment, sip=False, extn=False):
+    """
+    Calculate the maturity amount of a Public Provident Fund (PPF) investment.
+    Parameters:
+    investment_years (int): The number of years the investment is made for. Must be less than or equal to MAX_TENURE.
+    annual_investment (float): The annual investment amount. Must not exceed 150,000.
+    sip (bool, optional): If True, the investment is made monthly (Systematic Investment Plan). Defaults to False.
+    extn (bool, optional): If True, the investment period is extended by EXTN*2 years. Defaults to False.
+    Returns:
+    pd.DataFrame: A DataFrame containing the year-wise contributions, interests, and balances.
+    """
     contributions = []
     interests = []
     balances = []
@@ -36,14 +74,17 @@ def calculate_ppf_maturity(investment_years, annual_investment, sip=False, extn=
     i = 0
     cb = 0
 
+    # If extension is allowed, add the extension period to the investment years
     if extn:
         investment_years += EXTN*2
 
     for year in range(investment_years):
         # Interest for the year
         if sip:
+            # Calculate interest for SIP
             ob, annual_investment, i, cb = calculate_annual_interest_sip(cb, annual_investment/12)
         else: 
+            # Calculate interest for lumpsum investment
             ob, annual_investment, i, cb = calculate_annual_interest_lumpsum(cb, annual_investment)
 
         contributions.append(annual_investment)
